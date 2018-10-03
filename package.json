@@ -1,0 +1,27 @@
+{
+  "name": "strava-splix",
+  "version": "1.0.0",
+  "description": "splix.io but you have to ride your bike",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/overwatchcorp/strava-splix.git"
+  },
+  "author": "fungj",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/overwatchcorp/strava-splix/issues"
+  },
+  "homepage": "https://github.com/overwatchcorp/strava-splix#readme",
+  "dependencies": {
+    "@mapbox/polyline": "^1.0.0",
+    "dotenv": "^6.0.0",
+    "fastify": "^1.12.1",
+    "pg": "^7.4.3",
+    "strava-v3": "^1.14.0"
+  }
+}
