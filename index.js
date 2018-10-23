@@ -26,22 +26,37 @@ fastify.get('/auth-complete', (req, res) => {
   });
 });
 
-fastify.get('/', async (req, res) => {
-  // fetch token from database
-  const data = await pool.query('SELECT id, token FROM tokens');
-  const { id, token } = data.rows[0];
-  // fetch activities
-  strava.athlete.listActivities({ id: id }, (err, activities, limits) => {
-    const detailedMaps = [];
-    activities.map(({ id }) => {
-      strava.activities.get({ id }, (err, activity) => {
-        detailedMaps.push(activity);
-        if (detailedMaps.length === activities.length) {
-          res.send(detailedMaps);
-        }
+getDetailedActivities = () => {
+  return new Promise(async (resolve, reject) => {
+    // fetch token from database
+    const data = await pool.query('SELECT id, token FROM tokens');
+    const { id, token } = data.rows[0];
+    // fetch activities
+    strava.athlete.listActivities({ id: id }, (listErr, activities, limits) => {
+      if (listErr) reject(listErr);
+      const actList = [];
+      activities.map(({ id }) => {
+        strava.activities.get({ id }, (activitiesErr, activity) => {
+          if (activitiesErr) reject(activitiesErr);
+          actList.push(activity);
+          if (actList.length === activities.length) resolve(actList);
+        });
       });
     });
   });
+};
+
+storeDetailedActivitiy = (activity) => {
+  return new Promise((resolve, reject) => {
+    const addActivityQuery = 'INSERT INTO rides (id, athlete_id, polyline) VALUES (\'$1\', \'$2\', \'$3\');'  
+    await pool.query(addActivityQuery, [activity.id, activity.athlete.id, activity.map.polyline]);
+    resolve();
+  });
+}
+
+fastify.get('/', async (req, res) => {
+  const activities = await getDetailedActivities();
+  res.send(activities);
 });
 
 fastify.listen(3000, (err, addr) => {
